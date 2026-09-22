@@ -36,7 +36,12 @@
     </style>
     @livewireStyles
 </head>
-<body class="bg-[#F5F5F7] text-gray-900 font-sans antialiased selection:bg-telkom-red selection:text-white">
+<body class="bg-[#F8F9FA] text-gray-900 font-sans antialiased selection:bg-telkom-red selection:text-white relative overflow-x-hidden min-h-screen">
+    <!-- Ambient Background Blobs -->
+    <div class="fixed top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] rounded-full bg-red-100/50 blur-[120px]"></div>
+        <div class="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] rounded-full bg-slate-200/60 blur-[120px]"></div>
+    </div>
 
     <!-- Navbar -->
     <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/50 shadow-sm">

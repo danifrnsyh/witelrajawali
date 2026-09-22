@@ -86,62 +86,79 @@
             <!-- Top 4 Summary Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <!-- Card 1: Produktivitas -->
-                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-telkom-red/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Produktivitas</h3>
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-red-50 to-transparent rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="p-2.5 bg-red-50 rounded-xl text-telkom-red shadow-sm border border-red-100/50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Total Produktivitas</h3>
+                    </div>
                     <div class="flex items-baseline space-x-2">
                         <span class="text-5xl font-extrabold text-gray-900 tracking-tight">{{ $stats['total_tiket'] }}</span>
                         <span class="text-gray-400 font-medium text-lg">Tiket</span>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm">
-                        <div class="text-gray-600"><span class="font-bold text-gray-900">{{ $stats['total_utama'] }}</span> Utama</div>
-                        <div class="text-gray-600"><span class="font-bold text-gray-900">{{ $stats['total_pendamping'] }}</span> Pendamping</div>
+                    <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between text-sm">
+                        <div class="text-gray-500 font-medium"><span class="font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md mr-1">{{ $stats['total_utama'] }}</span> Utama</div>
+                        <div class="text-gray-500 font-medium"><span class="font-bold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-md mr-1">{{ $stats['total_pendamping'] }}</span> Pendamping</div>
                     </div>
                 </div>
 
                 <!-- Card 2: Spesialisasi -->
-                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 w-32 h-32 bg-gray-100 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Spesialisasi Order</h3>
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-gray-50 to-transparent rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="p-2.5 bg-gray-100 rounded-xl text-gray-600 shadow-sm border border-gray-200/50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Spesialisasi Order</h3>
+                    </div>
                     @php
                         $b2cPercent = $stats['total_tiket'] > 0 ? round(($stats['b2c'] / $stats['total_tiket']) * 100) : 0;
                         $b2bPercent = 100 - $b2cPercent;
                     @endphp
                     <div class="flex items-baseline space-x-2 mb-4">
-                        <span class="text-3xl font-extrabold text-gray-900">{{ $b2cPercent }}%</span>
+                        <span class="text-4xl font-extrabold text-gray-900 tracking-tight">{{ $b2cPercent }}%</span>
                         <span class="text-gray-400 font-medium">B2C</span>
                     </div>
                     <!-- Progress Bar -->
-                    <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden flex">
-                        <div class="bg-telkom-red h-full rounded-full" style="width: {{ $b2cPercent }}%"></div>
+                    <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden flex shadow-inner">
+                        <div class="bg-gradient-to-r from-red-600 to-red-400 h-full rounded-full" style="width: {{ $b2cPercent }}%"></div>
                         <div class="bg-gray-400 h-full rounded-full" style="width: {{ $b2bPercent }}%"></div>
                     </div>
-                    <div class="mt-3 flex justify-between text-xs font-medium text-gray-500">
-                        <span class="text-telkom-red">B2C ({{ $stats['b2c'] }})</span>
-                        <span class="text-gray-500">B2B/Ebis ({{ $stats['b2b'] }})</span>
+                    <div class="mt-4 flex justify-between text-xs font-semibold text-gray-500">
+                        <span class="text-telkom-red flex items-center"><div class="w-2 h-2 rounded-full bg-telkom-red mr-1.5"></div> B2C ({{ $stats['b2c'] }})</span>
+                        <span class="text-gray-500 flex items-center"><div class="w-2 h-2 rounded-full bg-gray-400 mr-1.5"></div> B2B ({{ $stats['b2b'] }})</span>
                     </div>
                 </div>
 
                 <!-- Card 3: Kecepatan SLA -->
-                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden group">
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Kecepatan Kerja (SLA)</h3>
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-50 to-transparent rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="p-2.5 bg-green-50 rounded-xl text-green-600 shadow-sm border border-green-100/50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Kecepatan (SLA)</h3>
+                    </div>
                     @php
                         $hours = floor($stats['avg_sla_minutes'] / 60);
                         $mins = $stats['avg_sla_minutes'] % 60;
                         $isFast = $stats['avg_sla_minutes'] < 120; // Example: < 2 hours is fast
                     @endphp
-                    <div class="flex items-baseline space-x-2">
-                        <span class="text-4xl font-extrabold text-gray-900">{{ $hours }}<span class="text-2xl font-semibold text-gray-400">J</span> {{ $mins }}<span class="text-2xl font-semibold text-gray-400">M</span></span>
+                    <div class="flex items-baseline space-x-1">
+                        <span class="text-4xl font-extrabold text-gray-900 tracking-tight">{{ $hours }}</span><span class="text-lg font-bold text-gray-400 mr-2">J</span>
+                        <span class="text-4xl font-extrabold text-gray-900 tracking-tight">{{ $mins }}</span><span class="text-lg font-bold text-gray-400">M</span>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-100 flex items-center">
+                    <div class="mt-5 pt-4 border-t border-gray-100 flex items-center">
                         @if($isFast)
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold bg-green-100 text-green-800">
+                                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                 Rata-rata Cepat
                             </span>
                         @else
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-telkom-red">
-                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold bg-orange-100 text-orange-800">
+                                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 Perlu Ditingkatkan
                             </span>
                         @endif
@@ -149,24 +166,30 @@
                 </div>
 
                 <!-- Card 4: Top Area -->
-                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Area Kerja Dominan</h3>
-                    <div class="space-y-3">
+                <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-300 relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-50 to-transparent rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                    <div class="flex items-center space-x-3 mb-5">
+                        <div class="p-2.5 bg-blue-50 rounded-xl text-blue-600 shadow-sm border border-blue-100/50">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Area Dominan</h3>
+                    </div>
+                    <div class="space-y-4">
                         @forelse($stats['top_areas'] as $area => $count)
                             @php
                                 $percent = $stats['total_tiket'] > 0 ? round(($count / $stats['total_tiket']) * 100) : 0;
                             @endphp
                             <div>
-                                <div class="flex justify-between text-xs font-medium text-gray-700 mb-1">
-                                    <span>{{ $area }}</span>
-                                    <span>{{ $percent }}%</span>
+                                <div class="flex justify-between text-xs font-bold text-gray-700 mb-1.5">
+                                    <span class="truncate pr-2">{{ $area }}</span>
+                                    <span class="text-blue-600">{{ $percent }}%</span>
                                 </div>
-                                <div class="w-full bg-gray-100 rounded-full h-1.5">
-                                    <div class="bg-gray-800 h-1.5 rounded-full" style="width: {{ $percent }}%"></div>
+                                <div class="w-full bg-gray-100 rounded-full h-2 shadow-inner">
+                                    <div class="bg-gradient-to-r from-blue-500 to-blue-400 h-2 rounded-full" style="width: {{ $percent }}%"></div>
                                 </div>
                             </div>
                         @empty
-                            <p class="text-sm text-gray-400">Belum ada data area.</p>
+                            <p class="text-sm text-gray-400 font-medium">Belum ada data area.</p>
                         @endforelse
                     </div>
                 </div>
@@ -219,10 +242,8 @@
                                 <tr class="hover:bg-gray-50/80 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $item['start_dt'] ? date('d M Y, H:i', strtotime($item['start_dt'])) : '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-xs font-bold text-gray-500">{{ $item['segment'] }}</td>
-                                    <td class="px-6 py-4">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
-                                            {{ $item['jenis_order'] }}
-                                        </span>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                                        {{ $item['jenis_order'] }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                         {{ $item['peran'] }}
