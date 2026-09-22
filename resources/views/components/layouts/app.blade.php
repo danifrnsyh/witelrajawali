@@ -52,6 +52,7 @@
                 <div class="flex space-x-6">
                     <a href="/" class="text-sm font-medium transition-colors {{ request()->is('/') ? 'text-telkom-red' : 'text-gray-500 hover:text-gray-900' }}">Data Sheet Utama</a>
                     <a href="/dashboard" class="text-sm font-medium transition-colors {{ request()->is('dashboard') ? 'text-telkom-red' : 'text-gray-500 hover:text-gray-900' }}">Dashboard Harian</a>
+                    <a href="/kinerja" class="text-sm font-medium transition-colors {{ request()->is('kinerja') ? 'text-telkom-red' : 'text-gray-500 hover:text-gray-900' }}">Rapor Teknisi</a>
                 </div>
             </div>
         </div>
