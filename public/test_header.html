@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="p-10 bg-gray-50">
+    <div class="w-[600px] border border-gray-300 rounded-[32px] p-4 relative bg-white">
+        
+        <div class="relative">
+            <!-- The fixed pill background for the header -->
+            <div class="absolute top-0 left-0 right-0 h-[48px] bg-gray-100 rounded-full pointer-events-none"></div>
+            
+            <div class="overflow-x-auto relative z-10">
+                <table class="w-full text-left border-separate border-spacing-0" style="min-width: 1200px;">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-4 text-xs font-bold sticky left-0 bg-gray-100 rounded-l-full z-20">COL 1 STICKY</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 2</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 3</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 4</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 5</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 6</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 7</th>
+                            <th class="px-5 py-4 text-xs font-bold bg-transparent">COL 8</th>
+                            <th class="px-5 py-4 text-xs font-bold sticky right-0 bg-gray-100 rounded-r-full z-20">COL 9 STICKY</th>
+                        </tr>
+                    </thead>
+                    <tbody class="[&>tr>td]:border-b [&>tr>td]:border-gray-200">
+                        <tr>
+                            <td class="px-5 py-4 sticky left-0 bg-white border-r border-gray-200 z-10">Data 1</td>
+                            <td class="px-5 py-4 bg-transparent">Data 2</td>
+                            <td class="px-5 py-4 bg-transparent">Data 3</td>
+                            <td class="px-5 py-4 bg-transparent">Data 4</td>
+                            <td class="px-5 py-4 bg-transparent">Data 5</td>
+                            <td class="px-5 py-4 bg-transparent">Data 6</td>
+                            <td class="px-5 py-4 bg-transparent">Data 7</td>
+                            <td class="px-5 py-4 bg-transparent">Data 8</td>
+                            <td class="px-5 py-4 sticky right-0 bg-white border-l border-gray-200 z-10">Data 9</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -12,3 +12,5 @@ Artisan::command('inspire', function () {
 Schedule::command('sheet:sync')
     ->everyMinute()
     ->withoutOverlapping();
+
+Schedule::command('sheet:sync-sobi')->everyMinute()->withoutOverlapping();
