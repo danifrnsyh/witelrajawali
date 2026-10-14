@@ -310,83 +310,7 @@ class SektoralViewer extends Component
 
         // Apply Filter Periode Tanggal Berdasarkan submission_key dari SheetData
         if (!empty($this->startDate) && !empty($this->endDate)) {
-            try {
-                $start = Carbon::parse($this->startDate)->startOfDay();
-                $end = Carbon::parse($this->endDate)->endOfDay();
-
-                // Ambil tiket dari SheetData yang berada dalam rentang tanggal submission_key
-                $activeTechs = [];
-                $techOrderCounts = [];
-
-                $tickets = SheetData::all();
-                foreach ($tickets as $ticket) {
-                    $row = $ticket->data;
-                    if (!is_array($row)) continue;
-
-                    $dateKey = $row[17] ?? null; // submission_key
-                    if (!$dateKey) continue;
-
-                    try {
-                        $ticketDate = Carbon::parse($dateKey);
-                        if ($ticketDate->gte($start) && $ticketDate->lte($end)) {
-                            // Cek kecocokan segmen dengan tab aktif
-                            $seg = strtoupper($row[2] ?? '');
-                            $matchesTab = false;
-                            if ($this->activeTab === '1_PSB_B2C' && (str_contains($seg, 'PROVISIONING') || str_contains($seg, 'PSB'))) {
-                                $matchesTab = true;
-                            } elseif ($this->activeTab === '2_ASSR_B2C' && str_contains($seg, 'ASSURANCE B2C')) {
-                                $matchesTab = true;
-                            } elseif ($this->activeTab === '3_ASSR_B2B' && (str_contains($seg, 'ASSURANCE B2B') || str_contains($seg, 'B2B'))) {
-                                $matchesTab = true;
-                            } elseif (empty($this->activeTab)) {
-                                $matchesTab = true;
-                            }
-
-                            if ($matchesTab) {
-                                $nik1 = trim($row[10] ?? ($row[1] ?? ''));
-                                $name1 = strtolower(trim($row[11] ?? ''));
-                                $nik2 = trim($row[12] ?? '');
-                                $name2 = strtolower(trim($row[13] ?? ''));
-
-                                if (!empty($nik1)) {
-                                    $activeTechs[$nik1] = true;
-                                    $techOrderCounts[$nik1] = ($techOrderCounts[$nik1] ?? 0) + 1;
-                                }
-                                if (!empty($name1)) {
-                                    $activeTechs[$name1] = true;
-                                }
-                                if (!empty($nik2)) {
-                                    $activeTechs[$nik2] = true;
-                                    $techOrderCounts[$nik2] = ($techOrderCounts[$nik2] ?? 0) + 1;
-                                }
-                                if (!empty($name2)) {
-                                    $activeTechs[$name2] = true;
-                                }
-                            }
-                        }
-                    } catch (\Exception $e) {}
-                }
-
-                // Saring data teknisi berdasarkan keaktifan tiket pada periode tersebut
-                if (!empty($activeTechs)) {
-                    $filteredData = [];
-                    foreach ($data as $item) {
-                        $itemNik = trim($item['NIK/Labor'] ?? ($item['NIK'] ?? ''));
-                        $itemName = strtolower(trim($item['Nama Teknisi'] ?? ''));
-
-                        if (isset($activeTechs[$itemNik]) || isset($activeTechs[$itemName])) {
-                            $orderCount = $techOrderCounts[$itemNik] ?? 0;
-                            $item['orders_in_period'] = $orderCount;
-                            $filteredData[] = $item;
-                        }
-                    }
-                    $data = $filteredData;
-                } else {
-                    $data = [];
-                }
-            } catch (\Exception $e) {
-                Log::error('Error filtering sektoral by submission_key: ' . $e->getMessage());
-            }
+            $data = $this->calculateDynamicSektoral($data);
         }
 
         // Apply Search
@@ -422,6 +346,234 @@ class SektoralViewer extends Component
         return $data;
     }
     
+    /**
+     * Engine perhitungan otomatis dan akurat untuk metrik, SKOR AKHIR, dan WorldSkills Score
+     * berdasarkan periode tanggal tiket mentah (submission_key).
+     */
+    private function calculateDynamicSektoral(array $baseData): array
+    {
+        try {
+            $start = Carbon::parse($this->startDate)->startOfDay();
+            $end = Carbon::parse($this->endDate)->endOfDay();
+
+            // 1. Ambil semua tiket dari SheetData dalam rentang tanggal
+            $tickets = SheetData::all();
+            
+            // Map tech NIK / Name ke data akumulasi
+            $techStats = [];
+
+            foreach ($tickets as $ticket) {
+                $row = $ticket->data;
+                if (!is_array($row)) continue;
+
+                $dateKey = $row[17] ?? null; // submission_key
+                if (!$dateKey) continue;
+
+                try {
+                    $ticketDate = Carbon::parse($dateKey);
+                    if ($ticketDate->lt($start) || $ticketDate->gt($end)) {
+                        continue;
+                    }
+                } catch (\Exception $e) {
+                    continue;
+                }
+
+                $seg = strtoupper(trim($row[2] ?? ''));
+                $jenisOrder = strtoupper(trim($row[3] ?? ''));
+                $manhour = isset($row[5]) && is_numeric($row[5]) 
+                    ? (float)$row[5] 
+                    : ((\App\Services\ProductivityService::BOBOT_MAP[$jenisOrder] ?? 0.38) * 5.3333);
+
+                $tech1Nik = trim($row[10] ?? ($row[1] ?? ''));
+                $tech1Name = strtolower(trim($row[11] ?? ''));
+                $tech2Nik = trim($row[12] ?? '');
+                $tech2Name = strtolower(trim($row[13] ?? ''));
+
+                $hasTech2 = (!empty($tech2Nik) || !empty($tech2Name));
+                $orderWeight = $hasTech2 ? 0.5 : 1.0;
+                $mhWeight = $hasTech2 ? ($manhour / 2.0) : $manhour;
+                $dayStr = $ticketDate->format('Y-m-d');
+
+                // Helper to record for a tech
+                $recordTech = function ($nik, $name) use (&$techStats, $seg, $orderWeight, $mhWeight, $dayStr) {
+                    if (empty($nik) && empty($name)) return;
+                    $key = !empty($nik) ? $nik : $name;
+
+                    if (!isset($techStats[$key])) {
+                        $techStats[$key] = [
+                            'nik' => $nik,
+                            'name' => $name,
+                            'active_days' => [],
+                            'prov_orders' => 0.0,
+                            'prov_mh' => 0.0,
+                            'nonprov_orders' => 0.0,
+                            'nonprov_mh' => 0.0,
+                            'ass_orders' => 0.0,
+                            'ass_mh' => 0.0,
+                            'other_orders' => 0.0,
+                            'other_mh' => 0.0,
+                            'sobi' => 0,
+                        ];
+                    }
+
+                    $techStats[$key]['active_days'][$dayStr] = true;
+
+                    // Klasifikasi segmen
+                    $isProv = str_contains($seg, 'PROVISIONING') || str_contains($seg, 'PSB');
+                    $isAss = str_contains($seg, 'ASSURANCE') || str_contains($seg, 'ASSR') || str_contains($seg, 'GANGGUAN');
+
+                    if ($isProv) {
+                        $techStats[$key]['prov_orders'] += $orderWeight;
+                        $techStats[$key]['prov_mh'] += $mhWeight;
+                    } else {
+                        $techStats[$key]['nonprov_orders'] += $orderWeight;
+                        $techStats[$key]['nonprov_mh'] += $mhWeight;
+                    }
+
+                    if ($isAss) {
+                        $techStats[$key]['ass_orders'] += $orderWeight;
+                        $techStats[$key]['ass_mh'] += $mhWeight;
+                    } else {
+                        $techStats[$key]['other_orders'] += $orderWeight;
+                        $techStats[$key]['other_mh'] += $mhWeight;
+                    }
+                };
+
+                if (!empty($tech1Nik) || !empty($tech1Name)) {
+                    $recordTech($tech1Nik, $tech1Name);
+                }
+                if (!empty($tech2Nik) || !empty($tech2Name)) {
+                    $recordTech($tech2Nik, $tech2Name);
+                }
+            }
+
+            // 2. Sinkronkan dengan SOBI / Digipos jika ada data
+            try {
+                $sobiRows = \App\Models\SobiDigiposData::where('row_index', '>', 1)->get();
+                foreach ($sobiRows as $sobi) {
+                    $sData = is_string($sobi->data) ? json_decode($sobi->data, true) : $sobi->data;
+                    if (!is_array($sData)) continue;
+                    $sNik = trim($sData[4] ?? ($sData[1] ?? ''));
+                    $sCount = isset($sData[10]) && is_numeric($sData[10]) ? (int)$sData[10] : (isset($sData[6]) && is_numeric($sData[6]) ? (int)$sData[6] : 0);
+                    if ($sNik && isset($techStats[$sNik])) {
+                        $techStats[$sNik]['sobi'] += $sCount;
+                    }
+                }
+            } catch (\Exception $e) {}
+
+            // 3. Bangun baris-baris data baru yang dihitung ulang
+            $calculatedRows = [];
+
+            foreach ($baseData as $item) {
+                $itemNik = trim($item['NIK/Labor'] ?? ($item['NIK'] ?? ''));
+                $itemName = strtolower(trim($item['Nama Teknisi'] ?? ''));
+
+                $matchedStats = $techStats[$itemNik] ?? ($techStats[$itemName] ?? null);
+                if (!$matchedStats) {
+                    // Teknisi tidak aktif dalam rentang tanggal ini
+                    continue;
+                }
+
+                $activeDaysCount = max(1, count($matchedStats['active_days']));
+                $newItem = $item;
+
+                if ($this->activeTab === '1_PSB_B2C') {
+                    $provOrders = $matchedStats['prov_orders'];
+                    $provMh = $matchedStats['prov_mh'];
+                    $nonOrders = $matchedStats['nonprov_orders'];
+                    $nonMh = $matchedStats['nonprov_mh'];
+                    $sobi = $matchedStats['sobi'];
+
+                    $idxP = $provMh / $activeDaysCount;
+                    $idxN = $nonMh / $activeDaysCount;
+                    $idxS = $sobi / $activeDaysCount;
+
+                    $skorAkhir = ($idxP * 3.3375) + ($idxN * 30.35) + ($idxS * 10.0);
+
+                    $newItem["Hari\n Aktif"] = (string)$activeDaysCount;
+                    $newItem["Provisioning\n (order)"] = number_format($provOrders, 1, ',', '.');
+                    $newItem["Provisioning\n (manhour)"] = number_format($provMh, 1, ',', '.');
+                    $newItem["Non-Prov\n (order)"] = number_format($nonOrders, 1, ',', '.');
+                    $newItem["Non-Prov\n (manhour)"] = number_format($nonMh, 1, ',', '.');
+                    $newItem["SOBI/\n Digipos"] = (string)$sobi;
+                    $newItem["Gangguan\n Pasca PSB"] = '0';
+                    $newItem["Idx Prov\n /hari"] = number_format($idxP, 1, ',', '.');
+                    $newItem["Idx Non\n /hari"] = number_format($idxN, 1, ',', '.');
+                    $newItem["SKOR\n AKHIR"] = number_format($skorAkhir, 2, ',', '.');
+                    $newItem['_raw_skor'] = $skorAkhir;
+                } else {
+                    // Tab 2 (ASSR B2C) atau Tab 3 (ASSR B2B)
+                    $assOrders = $matchedStats['ass_orders'];
+                    $assMh = $matchedStats['ass_mh'];
+                    $otherOrders = $matchedStats['other_orders'];
+                    $otherMh = $matchedStats['other_mh'];
+                    $sobi = $matchedStats['sobi'];
+
+                    $idxAss = $assMh / $activeDaysCount;
+                    $idxOther = $otherMh / $activeDaysCount;
+                    $idxS = $sobi / $activeDaysCount;
+
+                    $skorAkhir = ($idxAss * 7.1056) + ($idxOther * 6.597) + ($idxS * 45.03);
+
+                    $newItem["Hari\n Aktif"] = (string)$activeDaysCount;
+                    $newItem["Tiket Ass\n (jumlah)"] = number_format($assOrders, 1, ',', '.');
+                    $newItem["Tiket Ass\n (manhour)"] = number_format($assMh, 1, ',', '.');
+                    $newItem["Order Lain\n (jumlah)"] = number_format($otherOrders, 1, ',', '.');
+                    $newItem["Order Lain\n (manhour)"] = number_format($otherMh, 1, ',', '.');
+                    $newItem["SOBI/\n Digipos"] = (string)$sobi;
+                    $newItem["Idx Ass\n /hari"] = number_format($idxAss, 1, ',', '.');
+                    $newItem["Idx Lain\n /hari"] = number_format($idxOther, 1, ',', '.');
+                    $newItem["SKOR\n AKHIR"] = number_format($skorAkhir, 2, ',', '.');
+                    $newItem['_raw_skor'] = $skorAkhir;
+                }
+
+                $calculatedRows[] = $newItem;
+            }
+
+            // 4. Hitung WorldSkills Score secara Statistik Robust
+            if (!empty($calculatedRows)) {
+                $rawScores = array_column($calculatedRows, '_raw_skor');
+                sort($rawScores);
+                $cnt = count($rawScores);
+                $mid = (int)floor($cnt / 2);
+                $median = ($cnt % 2 === 0) ? ($rawScores[$mid - 1] + $rawScores[$mid]) / 2.0 : $rawScores[$mid];
+
+                $diffs = [];
+                foreach ($rawScores as $s) {
+                    $diffs[] = abs($s - $median);
+                }
+                sort($diffs);
+                $mad = ($cnt % 2 === 0) ? ($diffs[$mid - 1] + $diffs[$mid]) / 2.0 : $diffs[$mid];
+                $robustSD = ($mad > 0) ? ($mad * 1.4826) : 1.0;
+
+                foreach ($calculatedRows as &$cRow) {
+                    $s = $cRow['_raw_skor'];
+                    $wsScore = round((($s - $median) / $robustSD) * 30 + 700, 1);
+                    $cRow["WorldSkills\n Score"] = number_format($wsScore, 1, ',', '.');
+                    $cRow['_raw_ws'] = $wsScore;
+                }
+                unset($cRow);
+
+                // Urutkan berdasarkan WorldSkills Score Tertinggi
+                usort($calculatedRows, function($a, $b) {
+                    if ($a['_raw_ws'] == $b['_raw_ws']) return 0;
+                    return ($a['_raw_ws'] > $b['_raw_ws']) ? -1 : 1;
+                });
+
+                // Perbarui No Rank 1, 2, 3...
+                foreach ($calculatedRows as $idx => &$cRow) {
+                    $cRow['Rank'] = (string)($idx + 1);
+                }
+                unset($cRow);
+            }
+
+            return $calculatedRows;
+        } catch (\Exception $e) {
+            Log::error('Dynamic Sektoral Calculation Error: ' . $e->getMessage());
+            return $baseData;
+        }
+    }
+
     public function render()
     {
         return view('livewire.sektoral-viewer', [
