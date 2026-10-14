@@ -42,10 +42,10 @@
                 @auth
                 <!-- Bottom Controls Row -->
                 <div class="flex flex-col items-end space-y-2 export-btn-hide w-full sm:w-auto mt-2 justify-end">
-                    <button wire:click="openEditModal" class="px-5 py-2.5 text-sm font-semibold text-white bg-telkom-red hover:bg-telkom-red-hover rounded-full shadow-card transition-colors flex items-center justify-center w-full sm:w-auto shrink-0">
-                    <svg class="w-4 h-4 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Ubah Periode Data
-                </button>
+                    <button wire:click="openEditModal" class="h-[42px] px-5 text-sm font-semibold text-white bg-telkom-red hover:bg-telkom-red-hover rounded-full shadow-card transition-all inline-flex items-center justify-center w-full sm:w-auto shrink-0">
+                        <svg class="w-4 h-4 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Ubah Periode Data</span>
+                    </button>
                 </div>
                 @endauth
             </div>

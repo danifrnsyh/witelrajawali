@@ -10,16 +10,26 @@ class GoogleSheetService
 
     protected $credentialsPath;
 
-    public function __construct()
+    public function __construct($sheetId = null)
     {
-        $this->sheetId = env('GOOGLE_SHEET_ID');
+        $this->sheetId = $sheetId ?? env('GOOGLE_SHEET_ID');
         $this->credentialsPath = env('GOOGLE_APPLICATION_CREDENTIALS');
+    }
+
+    public function setSheetId($sheetId)
+    {
+        $this->sheetId = $sheetId;
+        return $this;
     }
 
     public function getAccessToken()
     {
         if (! $this->credentialsPath || ! file_exists($this->credentialsPath)) {
-            throw new \Exception('File credentials tidak ditemukan di: '.$this->credentialsPath);
+            if (file_exists(storage_path('app/credentials.json'))) {
+                $this->credentialsPath = storage_path('app/credentials.json');
+            } else {
+                throw new \Exception('File credentials tidak ditemukan di: '.$this->credentialsPath);
+            }
         }
 
         $json = json_decode(file_get_contents($this->credentialsPath), true);
@@ -62,15 +72,23 @@ class GoogleSheetService
         throw new \Exception('Gagal mendapatkan akses token. Pastikan kredensial benar.');
     }
 
-    public function updateRow($range, $values)
+    public function updateRow($range, $values, $customSheetId = null)
     {
         $token = $this->getAccessToken();
 
-        $targetSheetId = $this->sheetId;
-        if (strpos(strtoupper($range), 'SHEET1') !== false) {
-            $targetSheetId = env('GOOGLE_SHEET_ID_DATASHEET', $this->sheetId);
-        } elseif (strpos(strtoupper($range), 'DASHBOARD HARIAN') !== false) {
-            $targetSheetId = env('GOOGLE_SHEET_ID_DASHBOARD', $this->sheetId);
+        $targetSheetId = $customSheetId ?? $this->sheetId;
+        if (! $customSheetId) {
+            if (strpos(strtoupper($range), 'SHEET1') !== false) {
+                $targetSheetId = env('GOOGLE_SHEET_ID_DATASHEET', $this->sheetId);
+            } elseif (strpos(strtoupper($range), 'DASHBOARD HARIAN') !== false) {
+                $targetSheetId = env('GOOGLE_SHEET_ID_DASHBOARD', $this->sheetId);
+            } elseif (
+                strpos($range, '1_PSB_B2C') !== false ||
+                strpos($range, '2_ASSR_B2C') !== false ||
+                strpos($range, '3_ASSR_B2B') !== false
+            ) {
+                $targetSheetId = env('GOOGLE_SHEET_ID_SEKTORAL', env('GOOGLE_SHEET_ID_SOBI', $this->sheetId));
+            }
         }
 
         $url = "https://sheets.googleapis.com/v4/spreadsheets/{$targetSheetId}/values/{$range}?valueInputOption=USER_ENTERED";

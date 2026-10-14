@@ -182,6 +182,13 @@ class DashboardViewer extends Component
         }
     }
 
+    public function resetDateFilter()
+    {
+        $this->startDate = '';
+        $this->endDate = '';
+        $this->recalculate();
+    }
+
     public function closeEditModal()
     {
         $this->isEditModalOpen = false;

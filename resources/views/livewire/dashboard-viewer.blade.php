@@ -48,23 +48,58 @@
 
             @auth
             <!-- Date Range Creator (Below) -->
-            <div x-data="{ open: false }" class="flex flex-col items-end space-y-2 export-btn-hide w-full sm:w-auto mt-2 justify-end">
-                <button x-show="!open" @click="open = true" class="px-5 py-2.5 text-sm font-semibold text-white bg-telkom-red hover:bg-telkom-red-hover rounded-full shadow-card transition-colors flex items-center justify-center w-full sm:w-auto shrink-0">
-                    <svg class="w-4 h-4 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    Ubah Periode Data
-                </button>
-                <div x-show="open" style="display: none;" class="flex flex-col sm:flex-row flex-wrap sm:flex-nowrap items-center gap-3 bg-red-50 p-4 rounded-3xl sm:rounded-full border border-red-100 shadow-sm relative mt-2 w-full box-border">
-                    <span class="text-xs font-bold text-telkom-red uppercase tracking-wider shrink-0 w-full sm:w-auto text-center sm:text-left">Ubah Periode:</span>
-                    <div class="grid grid-cols-1 sm:flex sm:flex-row items-center gap-2 w-full sm:w-auto flex-1">
-                        <input type="text" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" placeholder="Dari Tanggal" wire:model="startDate" class="w-full px-4 py-2 text-sm text-text-main border border-border-card rounded-full bg-white focus:ring-1 focus:ring-telkom-red outline-none min-h-[40px]">
-                        <span class="text-text-subtle text-xs font-bold text-center shrink-0">s/d</span>
-                        <input type="text" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" placeholder="Sampai Tanggal" wire:model="endDate" class="w-full px-4 py-2 text-sm text-text-main border border-border-card rounded-full bg-white focus:ring-1 focus:ring-telkom-red outline-none min-h-[40px]">
+            <div x-data="{ open: false }" class="flex flex-col items-end export-btn-hide w-full sm:w-auto mt-2 justify-end">
+                <!-- Tombol Saat Tertutup -->
+                <div x-show="!open" class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    @if(!empty($startDate) && !empty($endDate))
+                        <button wire:click="resetDateFilter" class="h-[42px] px-4 text-sm font-semibold text-telkom-red bg-red-50 hover:bg-red-100 rounded-full border border-red-200 transition-colors inline-flex items-center gap-1.5 shrink-0 shadow-2xs" title="Reset ke Default">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            <span>Reset Periode</span>
+                        </button>
+                    @endif
+                    <button @click="open = true" class="h-[42px] px-5 text-sm font-semibold text-white bg-telkom-red hover:bg-telkom-red-hover rounded-full shadow-card transition-all inline-flex items-center justify-center w-full sm:w-auto shrink-0">
+                        <svg class="w-4 h-4 mr-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        <span>Ubah Periode Data</span>
+                    </button>
+                </div>
+
+                <!-- Form Ubah Periode Saat Terbuka -->
+                <div x-show="open" style="display: none;" class="min-h-[42px] flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 bg-red-50/90 p-2 sm:py-1 sm:pl-4 sm:pr-5 rounded-2xl sm:rounded-full border border-red-200/80 shadow-sm w-full sm:w-auto box-border">
+                    <!-- Label & Close Icon (Mobile) -->
+                    <div class="flex items-center justify-between sm:justify-start gap-1.5 shrink-0">
+                        <span class="text-xs font-bold text-telkom-red tracking-wider uppercase flex items-center gap-1.5 whitespace-nowrap">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            Ubah Periode:
+                        </span>
+                        <button @click="open = false" class="sm:hidden text-text-muted hover:text-text-main p-0.5" title="Tutup">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
-                    <div class="grid grid-cols-2 sm:flex sm:flex-row items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
-                        <button wire:click="applyDateFilter" @click="open = false" class="w-full sm:w-auto px-6 py-2 font-bold text-xs bg-telkom-red text-white hover:bg-telkom-red-hover rounded-full transition-colors flex items-center justify-center shrink-0">
+
+                    <!-- Input Tanggal Dari & Sampai -->
+                    <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between shrink-0">
+                        <div class="h-[34px] flex-1 sm:flex-initial flex items-center bg-white border border-border-card rounded-full px-3 focus-within:ring-1 focus-within:ring-telkom-red focus-within:border-telkom-red transition-all shadow-2xs">
+                            <span class="text-xs font-semibold text-text-muted mr-1.5 shrink-0 whitespace-nowrap">Dari:</span>
+                            <input type="date" wire:model="startDate" class="w-full sm:w-[115px] text-xs text-text-main font-semibold bg-transparent border-0 p-0 focus:ring-0 outline-none cursor-pointer">
+                        </div>
+                        <span class="text-text-muted text-xs font-bold shrink-0 px-0.5">s/d</span>
+                        <div class="h-[34px] flex-1 sm:flex-initial flex items-center bg-white border border-border-card rounded-full px-3 focus-within:ring-1 focus-within:ring-telkom-red focus-within:border-telkom-red transition-all shadow-2xs">
+                            <span class="text-xs font-semibold text-text-muted mr-1.5 shrink-0 whitespace-nowrap">Sampai:</span>
+                            <input type="date" wire:model="endDate" class="w-full sm:w-[115px] text-xs text-text-main font-semibold bg-transparent border-0 p-0 focus:ring-0 outline-none cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex items-center gap-1.5 w-full sm:w-auto justify-end shrink-0">
+                        <button wire:click="applyDateFilter" @click="open = false" class="h-[34px] flex-1 sm:flex-none px-4 text-xs font-bold text-white bg-telkom-red hover:bg-telkom-red-hover rounded-full transition-colors inline-flex items-center justify-center shrink-0 shadow-sm active:scale-95 whitespace-nowrap">
                             Terapkan
                         </button>
-                        <button @click="open = false" class="w-full sm:w-auto px-6 py-2 font-bold text-xs bg-white text-text-muted hover:text-text-main border border-border-card rounded-full hover:bg-gray-50 transition-colors flex items-center justify-center shrink-0">
+                        @if(!empty($startDate) && !empty($endDate))
+                            <button wire:click="resetDateFilter" class="h-[34px] px-3 text-xs font-bold text-telkom-red hover:text-telkom-red-hover bg-white hover:bg-red-50 border border-red-200 rounded-full transition-colors inline-flex items-center justify-center shrink-0 active:scale-95 whitespace-nowrap" title="Reset Periode">
+                                Reset
+                            </button>
+                        @endif
+                        <button @click="open = false" class="h-[34px] flex-1 sm:flex-none px-3.5 text-xs font-semibold text-text-muted hover:text-telkom-red bg-white hover:bg-gray-50 border border-border-card rounded-full transition-colors inline-flex items-center justify-center shrink-0 active:scale-95 shadow-2xs whitespace-nowrap">
                             Batal
                         </button>
                     </div>

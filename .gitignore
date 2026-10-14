@@ -1,8 +1,8 @@
 *.log
 .DS_Store
 .env
-.env.backup
-.env.production
+.env.*
+!.env.example
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -25,3 +25,54 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Laravel Storage & Framework Cache
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+/bootstrap/cache/*.php
+!/bootstrap/cache/.gitignore
+
+# Security & Credentials
+/storage/app/*.json
+/storage/app/credentials.json
+credentials.json
+*.key
+*.pem
+
+# Database files
+/database/*.sqlite
+/database/*.sqlite-journal
+database.sqlite
+*.sqlite
+*.sql
+
+# Backups & Archives
+*.zip
+*.tar.gz
+*.backup
+*.bak
+patch.zip
+sobi_*.zip
+temp_*.txt
+
+# Scratch and debug files
+test_*.php
+tweak_*.php
+test.php
+
+# Flutter artifacts
+flutter_application_1/.dart_tool/
+flutter_application_1/build/
+flutter_application_1/.flutter-plugins
+flutter_application_1/.flutter-plugins-dependencies
+flutter_application_1/.packages
+flutter_application_1/.pub/
+flutter_application_1/.pub-cache/
